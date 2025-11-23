@@ -1,0 +1,63 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+import RVD-Projects/Drawing/4
+import RVD-Projects/Functions/1
+
+//@version=6
+// @description Core lib for trade managments
+library("TradeManager", overlay=true)
+
+export GetTradeIndex(string entry_id) => 
+	for i = 0 to strategy.opentrades - 1
+		if(entry_id == strategy.opentrades.entry_id(i))
+			i
+
+// @returns [entry_id,entry_index,entry_size,entry_profit,entry_price,entry_profit_prtc]
+export GetTrade(string entry_id) =>
+	entry_index = GetTradeIndex(entry_id)
+	if(entry_index > 0)
+		entry_size = strategy.opentrades.size(entry_index)
+		entry_profit = strategy.opentrades.profit(entry_index)
+        entry_price = strategy.opentrades.entry_price(entry_index)
+		entry_profit_prtc = strategy.opentrades.profit_percent(entry_index)
+
+		[entry_id,entry_index,entry_size,entry_profit,entry_price,entry_profit_prtc]
+
+
+//@function This is an order to buy at market when price is at or below the limit price (go long)
+export BuyLimitOrder(string id, float limitPrice, bool isReducer = false) =>
+    strategy.order(id, strategy.long, na, limitPrice, na, "BuyLimit-" + id, strategy.oca.none)
+    Drawing.OrderLine(limitPrice, true, false, isReducer)
+
+// @function This is an order to sell at market when price is at or above the limit price (go short)
+export SellLimitOrder(string id, float limitPrice, bool isReducer = false) =>
+    strategy.order(id, strategy.short, na, limitPrice, na, "SellLimit-" + id, strategy.oca.none)
+    Drawing.OrderLine(limitPrice, false, false, isReducer)
+	
+// @function This is an order to buy at market when price reach the stop price (close short)
+export BuyStopOrder(string id, float stopPrice, bool isReducer = false) =>
+	strategy.order(id, strategy.long, na, na , stopPrice, "BuyStop-" + id, strategy.oca.none)
+	Drawing.OrderLine(stopPrice, true, true, isReducer)
+
+// @function This is an order to sell at market when price reaches the stop price (close long)
+export SellStopOrder(string id, float stopPrice, bool isReducer = false) =>
+    strategy.order(id, strategy.short, na, na, stopPrice, "SellStop-" + id, strategy.oca.none)
+    Drawing.OrderLine(stopPrice, false, true, isReducer)
+
+export StopLoss(string id, float stopPrice) =>
+	index = GetTradeIndex(id)
+	entry_size = strategy.opentrades.size(index)
+	entry_size > 0 ? SellStopOrder(id, stopPrice) : BuyStopOrder(id, stopPrice)
+
+export TakeProfit(string id, float limitPrice) =>
+	index = GetTradeIndex(id)
+	entry_size = strategy.opentrades.size(index)
+	entry_size > 0 ? SellLimitOrder(id, limitPrice) : BuyLimitOrder(id, limitPrice) 
+
+export CloseOrder(string id, float qty, float qty_prct) =>
+	quant = qty > 0 ? qty : na
+	quant_prct = qty_prct > 0 ? qty_prct : quant > 0 ? na : 100
+	strategy.close(id, qty=quant, qty_percent=quant_prct)
+
+export CloseAllOrders() =>  strategy.close_all("Close All")

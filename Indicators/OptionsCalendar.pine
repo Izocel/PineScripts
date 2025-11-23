@@ -1,0 +1,79 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+import RVD-Projects/Functions/2
+
+//@version=6
+//@description Options Expiry Calendar Indicator
+indicator("OptionsCalendar", overlay = true)
+
+const string CALENDAR_GROUP = "Options - Calendar"
+show_cal_lines = input.bool(true, "Show Options Expiry Lines", group=CALENDAR_GROUP)
+show_sub_lines = input.bool(true, "Show Sub-Entry (Expiry-Delta)", group=CALENDAR_GROUP)
+months_ahead = input.int(3, "Months ahead", minval=1, maxval=6, group=CALENDAR_GROUP)
+months_behind = input.int(12, "Months behind", minval=1, maxval=12, group=CALENDAR_GROUP)
+TZ = input.string("America/Toronto", "Timezone", group=CALENDAR_GROUP)
+
+if(show_cal_lines and (timeframe.isdwm or timeframe.in_seconds(timeframe.period) >= 14400))
+    var int lastCalculationDay = 0
+    
+    // Only calculate once per day
+    if dayofmonth != lastCalculationDay
+        lastCalculationDay := dayofmonth
+        const int standardP1 = -3
+        const int standardP2 = -10
+        const int quarterP1 = -14
+        const int quarterP2 = -27
+        
+        // Calculate start and end months based on current time
+        series int currentTime = last_bar_time
+        series int currentYear = year(currentTime, TZ)
+        series int currentMonth = month(currentTime, TZ)
+        
+        // Calculate month range: current month +/- separate ahead/behind values
+        series int startYear = currentYear
+        series int startMonth = currentMonth - months_behind
+        series int endYear = currentYear
+        series int endMonth = currentMonth + months_ahead
+        
+        // Adjust for month overflow/underflow
+        while startMonth <= 0
+            startMonth += 12
+            startYear -= 1
+        while endMonth > 12
+            endMonth -= 12
+            endYear += 1
+            
+        // Calculate total months to iterate
+        series int totalMonths = (endYear - startYear) * 12 + (endMonth - startMonth) + 1
+        
+        // Iterate through months only (highly optimized)
+        for i = 0 to totalMonths
+            series int iterYear = startYear + math.floor((startMonth + i - 1) / 12)
+            series int iterMonth = ((startMonth + i - 1) % 12) + 1
+            
+            // Get exact third Friday for this month
+            series int thirdFridayDay = Functions.ThirdFriday(iterYear, iterMonth, TZ)
+            series int bar_time = timestamp(TZ, iterYear, iterMonth, thirdFridayDay, 16)
+            
+            series bool bar_quarter = iterMonth % 3 == 0
+            series bool bar_next_quarter = (iterMonth + 1) % 3 == 0
+                
+            series float y1 = open * 0.999
+            series float y2 = open * 1.001
+            series int p1Increment = bar_quarter ? quarterP1 : standardP1
+            series int p2Increment = bar_quarter ? quarterP2 : standardP2
+            series int p1 = timestamp(TZ, iterYear, iterMonth, thirdFridayDay + p1Increment, 16)
+            series int p2 = timestamp(TZ, iterYear, iterMonth, thirdFridayDay + p2Increment, 16)
+
+            // Draw sub-lines (P1/P2) only if enabled
+            if show_sub_lines
+                line.new(xloc=xloc.bar_time, x1=p2, x2=p2, y1=y1, y2=y2, color=color.gray, width=1, extend=extend.both, style=line.style_dashed)
+                line.new(xloc=xloc.bar_time, x1=p1, x2=p1, y1=y1, y2=y2, color=color.gray, width=1, extend=extend.both, style=line.style_dashed)
+                //label.new(x=p2, y=open, text="Exp. -" + str.tostring(p2Increment), color=color.black, textcolor=color.white, style=label.style_label_down, size=size.tiny, xloc=xloc.bar_time)
+                //label.new(x=p1, y=open, text="Exp. -" + str.tostring(p1Increment), color=color.black, textcolor=color.white, style=label.style_label_down, size=size.tiny, xloc=xloc.bar_time)
+
+            // Always draw the main expiry line
+            line.new(xloc=xloc.bar_time, x1=bar_time, x2=bar_time, y1=y1, y2=y2, color=bar_next_quarter ? color.fuchsia : color.purple, width=2, extend=extend.both, style=line.style_dashed)
+            //label.new(x=bar_time, y=open, text=bar_next_quarter ? "Q Exp." : "M-Exp", color=bar_next_quarter ? color.red : color.blue, textcolor=color.white, style=label.style_label_down, size=size.tiny, xloc=xloc.bar_time)
+

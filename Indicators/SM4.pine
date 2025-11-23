@@ -1,0 +1,11 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+//@version=6
+//@description Four Simple Moving Averages (SM4) Indicator
+indicator("SM4", overlay = true)
+
+plot(ta.sma(close, 25), "25-MA", color = color.blue, linewidth = 1, display = display.pane)
+plot(ta.sma(close, 50), "50-MA", color = color.green, linewidth = 1, display = display.pane)
+plot(ta.sma(close, 100), "100-MA", color = color.orange, linewidth = 1, display = display.pane)
+plot(ta.sma(close, 200), "200-MA", color = color.gray, linewidth = 1, display = display.pane)

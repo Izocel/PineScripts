@@ -1,0 +1,34 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+//@version=6
+// @description Core Types library
+library("Types")
+
+export enum MaType
+    NONE="NONE"
+    SMA="SMA"
+    EMA="EMA"
+    RMA="RMA"
+    WMA="WMA"
+    VWMA="VWMA"
+
+export MaTypes() => [MaType.SMA, MaType.EMA, MaType.WMA, MaType.VWMA, MaType.RMA]
+
+export enum TrailingType
+    MODIFIED="Modified"
+    LIMITED="Limited"
+
+export TrailingTypes() => [TrailingType.MODIFIED, TrailingType.LIMITED]
+
+// @returns [ma_type, ma_length]
+export MaInputs(MaType ma_type, int ma_length) => 
+	[ma_type, ma_length]
+
+// @returns [ma_type, ma_length, vol_under, vol_over]
+export VolumeTrigersInputs(MaType ma_type, int ma_length, float under_prct, float over_prct) => 
+	[t, l] = MaInputs(ma_type, ma_length)
+	[t, l, under_prct, over_prct]
+
+// @returns [ma_type, ma_length, vol_under, vol_over]
+export RsiTrigersInputs(int rsi_length, float under_val, float over_val) => 
+	[rsi_length,  under_val, over_val]

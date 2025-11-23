@@ -1,0 +1,23 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+//@version=6
+// @description Core Functions library
+library("Functions", overlay=true)
+
+export Spread() => ask - bid
+
+export IsNewCandle(string tf) => timeframe.change(tf)
+
+export ThirdFriday(int y=year, int m=month, string tz=syminfo.timezone) =>
+    series int firstDay = timestamp(tz, y, m, 1, 0)
+    series int firstDayOfWeek = dayofweek(firstDay)
+    
+    // Debug explanation: Calculate days to first Friday
+    // If first day is Friday (6) or before, first Friday is in first week
+    // If first day is Saturday (7), first Friday is in second week
+    series int firstFriday = firstDayOfWeek <= dayofweek.friday ? 6 - (firstDayOfWeek - dayofweek.friday) : 13 - (firstDayOfWeek - dayofweek.friday)
+    
+    // Debug: Third Friday is always 14 days (2 weeks) after first Friday
+    series int thirdFriday = firstFriday + 14
+    thirdFriday

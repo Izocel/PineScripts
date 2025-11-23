@@ -1,0 +1,25 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+//@version=6
+// @description Core Drawing library
+library("Drawing", overlay=true)
+
+export OrderLine(float price, bool isBuy = false, bool isStop = false, bool isReducer = false) =>
+    color col = color.black
+    string textLabel = (isBuy ? "Long" : "Short") + (isStop ? " stop" : " limit")
+
+    if(isReducer and isBuy)
+        col := isStop ? color.red : color.green
+    if(isReducer and not isBuy)
+        col := isStop ? color.green : color.red
+
+    line.new(bar_index, price, bar_index + 5, price, extend = extend.both, style = line.style_dashed, color = col)
+    label.new(bar_index, price, textLabel,style = label.style_label_right, color = col, textcolor = color.white)
+
+export clearLineExtend(line l) =>
+    l.set_x2(bar_index)
+    l.set_extend(extend.none)
+
+export deleteLine(line l) =>
+    l.delete()
