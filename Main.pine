@@ -320,3 +320,36 @@ if(show_cal_lines and (timeframe.isdwm or timeframe.in_seconds(timeframe.period)
             line.new(xloc=xloc.bar_time, x1=bar_time, x2=bar_time, y1=y1, y2=y2, color=bar_next_quarter ? color.fuchsia : color.purple, width=2, extend=extend.both, style=line.style_dashed)
             //label.new(x=bar_time, y=open, text=bar_next_quarter ? "Q Exp." : "M-Exp", color=bar_next_quarter ? color.red : color.blue, textcolor=color.white, style=label.style_label_down, size=size.tiny, xloc=xloc.bar_time)
 
+//////////////////////////////////////////////// VWAP-Channel Indicator
+src1 = input.source(defval = low, title="S1", group="VWAP Settings")
+src2 = input.source(defval = high, title="S2", group="VWAP Settings")
+
+var anchor = input.string(defval = "Session", title="Anchor Period",
+ options=["Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group="VWAP Settings")
+
+new_earnings = request.earnings(syminfo.tickerid, earnings.actual, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+new_dividends = request.dividends(syminfo.tickerid, dividends.gross, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+new_split = request.splits(syminfo.tickerid, splits.denominator, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+
+isNewPeriod = switch anchor
+	"Earnings"  => not na(new_earnings)
+	"Dividends" => not na(new_dividends)
+	"Splits"    => not na(new_split)
+	"Session"   => timeframe.change("D")
+	"Week"      => timeframe.change("W")
+	"Month"     => timeframe.change("M")
+	"Quarter"   => timeframe.change("3M")
+	"Year"      => timeframe.change("12M")
+	"Decade"    => timeframe.change("12M") and year % 10 == 0
+	"Century"   => timeframe.change("12M") and year % 100 == 0
+	=> false
+
+isEsdAnchor = anchor == "Earnings" or anchor == "Dividends" or anchor == "Splits"
+if na(src1[1]) and not isEsdAnchor
+	isNewPeriod := true
+
+vwap1 = ta.vwap(src1, isNewPeriod)
+vwap2 = ta.vwap(src2, isNewPeriod)
+
+plot(vwap1, color=color.fuchsia, title="VWAP Low")
+plot(vwap2, color=color.fuchsia, title="VWAP High")
