@@ -14,6 +14,39 @@ import RVD-Projects/TradeManager/5
 
 // # ========================================================================= #
 // #                   |   STRATEGY  |
+// 🎯 Concept Principal
+// La stratégie utilise les VWAP Intra-day (Volume Weighted Average Price) pour créer des zones de trading basées sur les prix pondérés par le volume de la journée.
+
+// 📊
+//  Calcul des VWAP
+// 3 niveaux VWAP recalculés chaque nouveau jour (timeframe.change("D"))
+// Créent des zones de support/résistance dynamiques
+// 🔄
+//  Règles de Trading
+// 📈
+//  Positions LONGUES
+// Entrée : Prix clôture > VWAP High (ta.crossover(close, highVWAP))
+// Sortie : Prix clôture < VWAP Low (ta.crossunder(close, lowVWAP))
+// 📉
+//  Positions COURTES
+// Entrée : Prix clôture < VWAP Low (ta.crossunder(close, lowVWAP))
+// Sortie : Prix clôture > VWAP High (ta.crossover(close, highVWAP))
+// ⏰
+//  Gestion du Temps
+// 🚫
+//  Fenêtre d'Interdiction (3PM-6PM Toronto)
+// Aucune nouvelle position pendant cette période
+// Fermeture forcée de toutes les positions existantes
+// Évite les mouvements de fin de séance
+// ⏱️
+//  Limitation de Détention
+// Maximum 6 heures de détention par position
+// Fermeture automatique si dépassé
+// Limite l'exposition au risque
+// # ========================================================================= #
+
+// # ========================================================================= #
+// #                   |   STRATEGY  |
 // # ========================================================================= #
 strategy(
  title                           = "IVWAP Strategy",
