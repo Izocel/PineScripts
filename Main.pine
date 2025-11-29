@@ -6,10 +6,45 @@ import RVD-Projects/Functions/2
 
 import TradingView/ta/9
 import PineCoders/Time/5
+import RVD-Projects/TradeManager/5
 
 //@version=6
-//@description RVD-001 Indicator combining BlackFlag, Sessions, Options Calendar, and SMAs
-indicator("RVD-001", overlay = true, behind_chart = true)
+//@description RVD-01
+strategy(
+ title                           = "RVD-01",
+ shorttitle                      = "RVÐ",
+ overlay                         =  true,
+ behind_chart                    =  true,
+ commission_value                =  2.00,
+ initial_capital                 =  50000.00,
+ currency                        =  currency.USD,
+ commission_type                 =  strategy.commission.cash_per_contract
+//  slippage                        =  ,
+//  default_qty_type                =  ,
+//  default_qty_value               =  ,
+//  format                          =  ,
+//  precision                       =  ,
+//  scale                           =  ,
+//  pyramiding                      =  ,
+//  calc_on_order_fills             =  ,
+//  calc_on_every_tick              =  ,
+//  max_bars_back                   =  ,
+//  backtest_fill_limits_assumption =  ,
+//  process_orders_on_close         =  ,
+//  close_entries_rule              =  ,
+//  margin_long                     =  ,
+//  margin_short                    =  ,
+//  explicit_plot_zorder            =  ,
+//  max_lines_count                 =  ,
+//  max_labels_count                =  ,
+//  max_boxes_count                 =  ,
+//  calc_bars_count                 =  ,
+//  risk_free_rate                  =  ,
+//  use_bar_magnifier               =  ,
+//  fill_orders_on_standard_ohlc    =  ,
+//  max_polylines_count             =  ,
+//  dynamic_requests                =  ,
+ )
 
 //////////////////////////////////////////////// BlackFlag Indicator
 norm_o = open
@@ -320,36 +355,72 @@ if(show_cal_lines and (timeframe.isdwm or timeframe.in_seconds(timeframe.period)
             line.new(xloc=xloc.bar_time, x1=bar_time, x2=bar_time, y1=y1, y2=y2, color=bar_next_quarter ? color.fuchsia : color.purple, width=2, extend=extend.both, style=line.style_dashed)
             //label.new(x=bar_time, y=open, text=bar_next_quarter ? "Q Exp." : "M-Exp", color=bar_next_quarter ? color.red : color.blue, textcolor=color.white, style=label.style_label_down, size=size.tiny, xloc=xloc.bar_time)
 
-//////////////////////////////////////////////// VWAP-Channel Indicator
-src1 = input.source(defval = low, title="S1", group="VWAP Settings")
-src2 = input.source(defval = high, title="S2", group="VWAP Settings")
+//////////////////////////////////////////////// Intra-VWAP Strategy
+hasPosition = strategy.position_size != 0
+currentHour = hour(time, "America/Toronto")
+isNewPeriod = timeframe.change("D") or na(low[1])
+isNoTradeWindow = currentHour >= 15 and currentHour < 18
+mustFlatten = isNoTradeWindow and hasPosition
 
-var anchor = input.string(defval = "Session", title="Anchor Period",
- options=["Session", "Week", "Month", "Quarter", "Year", "Decade", "Century", "Earnings", "Dividends", "Splits"], group="VWAP Settings")
+var float lastTradeTime = na
+// Check if position should be closed due to max holding time
+shouldCloseHolding = hasPosition and not na(lastTradeTime) and (time - lastTradeTime) >= 6 * 60 * 60 * 1000
 
-new_earnings = request.earnings(syminfo.tickerid, earnings.actual, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
-new_dividends = request.dividends(syminfo.tickerid, dividends.gross, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
-new_split = request.splits(syminfo.tickerid, splits.denominator, barmerge.gaps_on, barmerge.lookahead_on, ignore_invalid_symbol=true)
+// VWAP calculations
+lowVWAP = ta.vwap(low, isNewPeriod)
+highVWAP = ta.vwap(high, isNewPeriod)
+middleVWAP = highVWAP - (highVWAP - lowVWAP) / 2
 
-isNewPeriod = switch anchor
-	"Earnings"  => not na(new_earnings)
-	"Dividends" => not na(new_dividends)
-	"Splits"    => not na(new_split)
-	"Session"   => timeframe.change("D")
-	"Week"      => timeframe.change("W")
-	"Month"     => timeframe.change("M")
-	"Quarter"   => timeframe.change("3M")
-	"Year"      => timeframe.change("12M")
-	"Decade"    => timeframe.change("12M") and year % 10 == 0
-	"Century"   => timeframe.change("12M") and year % 100 == 0
-	=> false
+// Long entry and exit conditions
+longEntry = ta.crossover(close, highVWAP)
+longExit = ta.crossunder(close, lowVWAP)
 
-isEsdAnchor = anchor == "Earnings" or anchor == "Dividends" or anchor == "Splits"
-if na(src1[1]) and not isEsdAnchor
-	isNewPeriod := true
+// Short entry and exit conditions
+shortEntry = ta.crossunder(close, lowVWAP)
+shortExit = ta.crossover(close, highVWAP)
 
-vwap1 = ta.vwap(src1, isNewPeriod)
-vwap2 = ta.vwap(src2, isNewPeriod)
+// Force close positions that have been held for too long
+if (shouldCloseHolding)
+    TradeManager.CloseAllOrders()
+    alert("IVWAP: Force close - Max holding time reached (6h)", alert.freq_once_per_bar)
+    lastTradeTime := time
 
-plot(vwap1, color=color.fuchsia, title="VWAP Low")
-plot(vwap2, color=color.fuchsia, title="VWAP High")
+// Close all positions if we're in the 4PM-6PM window and have open trades
+if (isNoTradeWindow)
+    if (mustFlatten)
+        TradeManager.CloseAllOrders()
+        alert("IVWAP: Force close - Market close window (3PM-6PM Toronto)", alert.freq_once_per_bar)
+        lastTradeTime := time
+else
+    // Long trade management
+    if (longEntry)
+        strategy.entry("Long", strategy.long)
+        alert("IVWAP: LONG ENTRY - Close crossed above High VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
+        lastTradeTime := time
+
+    if (longExit)
+        TradeManager.CloseOrder("Long", na, na)
+        alert("IVWAP: LONG EXIT - Close crossed below Low VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
+        lastTradeTime := time
+
+    // Short trade management
+    if (shortEntry)
+        strategy.entry("Short", strategy.short)
+        alert("IVWAP: SHORT ENTRY - Close crossed below Low VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
+        lastTradeTime := time
+
+    if (shortExit)
+        TradeManager.CloseOrder("Short", na, na)
+        alert("IVWAP: SHORT EXIT - Close crossed above High VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
+        lastTradeTime := time
+
+// Plot VWAP lines
+plot(lowVWAP, color=color.fuchsia, title="Low")
+plot(middleVWAP, color=color.aqua, title="Middle")
+plot(highVWAP, color=color.fuchsia, title="High")
+
+// Plot closing window background
+bgcolor(isNoTradeWindow ? color.new(color.red, 90) : na, title="Non-Trading Window BG")
+
+// Plot must go flat label
+plotshape(mustFlatten ? close : na, title="Forced Flat", location=location.top, style=shape.labeldown, text="Forced Flat", textcolor=color.white, size=size.small, color=color.red)

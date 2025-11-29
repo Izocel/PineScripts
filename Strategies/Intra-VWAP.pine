@@ -112,30 +112,36 @@ shortExit = ta.crossover(close, highVWAP)
 // Force close positions that have been held for too long
 if (shouldCloseHolding)
     TradeManager.CloseAllOrders()
+    alert("IVWAP: Force close - Max holding time reached (6h)", alert.freq_once_per_bar)
     lastTradeTime := time
 
 // Close all positions if we're in the 4PM-6PM window and have open trades
 if (isNoTradeWindow)
     if (mustFlatten)
         TradeManager.CloseAllOrders()
+        alert("IVWAP: Force close - Market close window (3PM-6PM Toronto)", alert.freq_once_per_bar)
         lastTradeTime := time
 else
     // Long trade management
     if (longEntry)
         strategy.entry("Long", strategy.long)
+        alert("IVWAP: LONG ENTRY - Close crossed above High VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
         lastTradeTime := time
 
     if (longExit)
         TradeManager.CloseOrder("Long", na, na)
+        alert("IVWAP: LONG EXIT - Close crossed below Low VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
         lastTradeTime := time
 
     // Short trade management
     if (shortEntry)
         strategy.entry("Short", strategy.short)
+        alert("IVWAP: SHORT ENTRY - Close crossed below Low VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
         lastTradeTime := time
 
     if (shortExit)
         TradeManager.CloseOrder("Short", na, na)
+        alert("IVWAP: SHORT EXIT - Close crossed above High VWAP @ " + str.tostring(close, "#.##"), alert.freq_once_per_bar)
         lastTradeTime := time
 
 // Plot VWAP lines
