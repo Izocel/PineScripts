@@ -13,7 +13,6 @@ import RVD-Projects/TradeManager/5
 // @description IVWAP Strategy
 
 // # ========================================================================= #
-// #                   |   STRATEGY  |
 // 🎯 Concept Principal
 // La stratégie utilise les VWAP Intra-day (Volume Weighted Average Price) pour créer des zones de trading basées sur les prix pondérés par le volume de la journée.
 
