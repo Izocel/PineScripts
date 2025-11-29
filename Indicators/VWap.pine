@@ -7,8 +7,9 @@ import RVD-Projects/Functions/2
 import TradingView/ta/9
 import PineCoders/Time/5
 
-//@version=6
-//@description 
+// @version=6
+// @link RVD-Projects/VWap/1
+// @description VWAP Channel Indicator
 indicator("VWAP-Channel", overlay = true, behind_chart = true)
 
 src1 = input.source(defval = low, title="S1", group="VWAP Settings")

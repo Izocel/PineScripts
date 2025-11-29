@@ -4,7 +4,8 @@
 import RVD-Projects/Drawing/4
 import RVD-Projects/Functions/1
 
-//@version=6
+// @version=6
+// @link RVD-Projects/TradeManager/5
 // @description Core lib for trade managments
 library("TradeManager", overlay=true)
 

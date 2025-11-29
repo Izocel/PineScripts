@@ -1,0 +1,26 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+import RVD-Projects/Types/3
+import RVD-Projects/Functions/2
+
+import TradingView/ta/9
+import PineCoders/Time/5
+
+// @version=6
+// @link=RVD-Projects/Lib/1
+// @description <library_description>
+
+library(title = "", overlay =  , dynamic_requests =  )
+
+
+// ===========================================================================*
+// *    >* The function_name Function *<
+// *==========================================================================*
+// @function <function_description>
+// @param <parameter> <parameter_description>
+// @returns <return_value_description>
+export function_name(<parameter_name> = [<default_value>][...]) =>
+    <function_code>
+
+("Test", overlay = true, behind_chart = true)
