@@ -19,7 +19,14 @@ strategy(
  title                           = "IVWAP Strategy",
  shorttitle                      = "ST-IVWAP",
  overlay                         =  true,
- behind_chart                    =  true
+ behind_chart                    =  true,
+ commission_value                =  2.00,
+ initial_capital                 =  50000.00,
+ currency                        =  currency.USD,
+ commission_type                 =  strategy.commission.cash_per_contract
+//  slippage                        =  ,
+//  default_qty_type                =  ,
+//  default_qty_value               =  ,
 //  format                          =  ,
 //  precision                       =  ,
 //  scale                           =  ,
@@ -28,13 +35,6 @@ strategy(
 //  calc_on_every_tick              =  ,
 //  max_bars_back                   =  ,
 //  backtest_fill_limits_assumption =  ,
-//  default_qty_type                =  ,
-//  default_qty_value               =  ,
-//  initial_capital                 =  ,
-//  currency                        =  , 
-//  slippage                        =  ,
-//  commission_type                 =  , 
-//  commission_value                =  ,
 //  process_orders_on_close         =  ,
 //  close_entries_rule              =  ,
 //  margin_long                     =  ,
@@ -54,54 +54,65 @@ strategy(
 // #                   |   STRATEGY  |
 // # ========================================================================= #
 
-isNewPeriod = timeframe.change("D")
+hasPosition = strategy.position_size != 0
+currentHour = hour(time, "America/Toronto")
+isNewPeriod = timeframe.change("D") or na(low[1])
+isNoTradeWindow = currentHour >= 15 and currentHour < 18
+mustFlatten = isNoTradeWindow and hasPosition
+
+var float lastTradeTime = na
+// Check if position should be closed due to max holding time
+shouldCloseHolding = hasPosition and not na(lastTradeTime) and (time - lastTradeTime) >= 6 * 60 * 60 * 1000
+
+// VWAP calculations
 lowVWAP = ta.vwap(low, isNewPeriod)
 highVWAP = ta.vwap(high, isNewPeriod)
 middleVWAP = highVWAP - (highVWAP - lowVWAP) / 2
 
-if na(low)
-    isNewPeriod := true
+// Long entry and exit conditions
+longEntry = ta.crossover(close, highVWAP)
+longExit = ta.crossunder(close, lowVWAP)
 
-// Time-based position management
-currentHour = hour(time, "America/Toronto")
-isFlattenWindow = currentHour >= 15 and currentHour < 18
-mustFlatten = isFlattenWindow and strategy.position_size != 0
+// Short entry and exit conditions
+shortEntry = ta.crossunder(close, lowVWAP)
+shortExit = ta.crossover(close, highVWAP)
+
+// Force close positions that have been held for too long
+if (shouldCloseHolding)
+    TradeManager.CloseAllOrders()
+    lastTradeTime := time
 
 // Close all positions if we're in the 4PM-6PM window and have open trades
-if (isFlattenWindow)
+if (isNoTradeWindow)
     if (mustFlatten)
         TradeManager.CloseAllOrders()
+        lastTradeTime := time
 else
-    // Long entry and exit conditions
-    longEntry = ta.crossover(close, lowVWAP)
-    longExitHigh = ta.crossover(close, highVWAP)
-    longExitMiddle = ta.crossunder(close, middleVWAP)
-
-    // Short entry and exit conditions
-    shortEntry = ta.crossunder(close, highVWAP)
-    shortExitLow = ta.crossunder(close, lowVWAP)
-    shortExitMiddle = ta.crossover(close, middleVWAP)
-
     // Long trade management
     if (longEntry)
         strategy.entry("Long", strategy.long)
+        lastTradeTime := time
 
-    if (longExitHigh or longExitMiddle)
+    if (longExit)
         TradeManager.CloseOrder("Long", na, na)
+        lastTradeTime := time
 
     // Short trade management
     if (shortEntry)
         strategy.entry("Short", strategy.short)
+        lastTradeTime := time
 
-    if (shortExitLow or shortExitMiddle)
+    if (shortExit)
         TradeManager.CloseOrder("Short", na, na)
+        lastTradeTime := time
 
+// Plot VWAP lines
 plot(lowVWAP, color=color.fuchsia, title="Low")
 plot(middleVWAP, color=color.aqua, title="Middle")
 plot(highVWAP, color=color.fuchsia, title="High")
 
 // Plot closing window background
-bgcolor(isFlattenWindow ? color.new(color.red, 90) : na, title="Must Go Flat BG")
+bgcolor(isNoTradeWindow ? color.new(color.red, 90) : na, title="Non-Trading Window BG")
 
 // Plot must go flat label
-plotshape(mustFlatten ? close : na, title="Must Go Flat", location=location.top, style=shape.labeldown, text="All Positions Flat", textcolor=color.white, size=size.small, color=color.red)
+plotshape(mustFlatten ? close : na, title="Forced Flat", location=location.top, style=shape.labeldown, text="Forced Flat", textcolor=color.white, size=size.small, color=color.red)
