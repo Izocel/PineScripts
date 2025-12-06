@@ -11,7 +11,7 @@ import RVD-Projects/TradeManager/5
 //@version=6
 //@description RVD-01
 strategy(
- title                           = "RVD-01",
+ title                           = "RVÐ",
  shorttitle                      = "RVÐ",
  overlay                         =  true,
  behind_chart                    =  true,
