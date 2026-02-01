@@ -1,13 +1,13 @@
-// [MARKET CAP > 2,000] AND [5 DAYS AGO CLOSE > CLOSE] AND [RSI(14) <= 42] AND [ABSVAL(WILLIAMS %R(14)) >= 64] AND [MACD SIGNAL(12,26,9) <= 0.0] AND [MACD LINE(12,26,9) <= 0.0] AND [8 DAYS AGO RSI(14) < RSI(14)] AND [ABSVAL(4 DAYS AGO WILLIAMS %R(14)) > ABSVAL(WILLIAMS %R(14))]
+// [MARKET CAP > 2,000] AND [5 DAYS AGO CLOSE > CLOSE] AND [RSI(14) <= 42] AND [WILLIAMS %R(14) <= -64] AND [MACD SIGNAL(12,26,9) <= 0.0] AND [MACD LINE(12,26,9) <= 0.0] AND [8 DAYS AGO RSI(14) < RSI(14)] AND [4 DAYS AGO WILLIAMS %R(14) < WILLIAMS %R(14)]
 
 [market cap > 2,000]
 and [5 days ago close > close]
 and [RSI(14) <= 42]
-and [AbsVal(Williams %R(14)) >= 64]
+and [Williams %R(14) <= -64]
 and [MACD Signal(12,26,9) <= 0.0]
 and [MACD Line(12,26,9) <= 0.0]
 and [8 days ago RSI(14) < RSI(14)]
-and [AbsVal(4 days ago Williams %R(14)) > AbsVal(Williams %R(14))]
+and [4 days ago Williams %R(14) < Williams %R(14)]
 
 // DESCRIPTION:
 // This trading strategy identifies potential bullish divergence momentum opportunities
