@@ -12,7 +12,7 @@ and [4 days ago Williams %R(14) < Williams %R(14)]
 
 // DESCRIPTION:
 // This trading strategy identifies potential bullish divergence momentum opportunities
-// by combining multiple technical indicators over a 5-day timeframe.
+// by combining multiple technical indicators over a 5-day timeframe with divergence analysis.
 //
 // KEY COMPONENTS:
 // - Market Cap Filter: Only considers stocks with market cap > 2 billion
@@ -20,13 +20,22 @@ and [4 days ago Williams %R(14) < Williams %R(14)]
 // - RSI(14): Must be <= 42 (oversold territory, indicating potential reversal)
 // - Williams %R(14): Must be <= -64 (oversold condition)
 // - MACD: Both signal and main line must be <= 0 (bearish momentum)
-// - Divergence Detection: RSI trending up over 8 days while Williams %R trending down over 4 days
+// - Divergence Detection: 
+//   * RSI trending up over 8 days (8 days ago RSI < current RSI)
+//   * Williams %R trending down over 4 days (4 days ago Williams %R < current Williams %R)
 //
 // STRATEGY LOGIC:
 // The strategy looks for stocks that have declined in price but show improving RSI momentum
 // while Williams %R shows deteriorating momentum, creating a divergence pattern.
 // This divergence, combined with oversold conditions and bearish MACD, suggests
-// a potential bullish reversal setup.
+// a potential bullish reversal setup where momentum indicators disagree with price action.
+//
+// DIVERGENCE SETUP:
+// - Price: Declining (5 days ago close > current close)
+// - RSI: Improving (rising over 8-day period)
+// - Williams %R: Deteriorating (falling over 4-day period)
+// This creates a classic bullish divergence scenario
 //
 // TIMEFRAME: Best suited for swing trading with 5-day momentum analysis
 // RISK LEVEL: Medium - requires confirmation from multiple indicators
+// UPDATE FREQUENCY: Optimized for intraday updates as noted in header

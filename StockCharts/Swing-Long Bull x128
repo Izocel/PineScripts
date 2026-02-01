@@ -34,4 +34,4 @@ and [Ichimoku Conversion Line(9,26,52) >= Ichimoku Base Line(9,26,52)]
 // ENTRY CONDITIONS: All conditions must be met simultaneously
 // TIMEFRAME: Best suited for swing trading (3-10 day holds)
 // RISK LEVEL: Medium-High - focuses on momentum continuation rather than reversal
-
+// UPDATE FREQUENCY: Tracks signals from 12 trading days before last intraday update
