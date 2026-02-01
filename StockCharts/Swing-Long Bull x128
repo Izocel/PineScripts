@@ -16,6 +16,7 @@ and [Ichimoku Conversion Line(9,26,52) >= Ichimoku Base Line(9,26,52)]
 //
 // KEY COMPONENTS:
 // - Market Cap Filter: Only considers stocks with market cap > 2 billion (large-cap focus)
+// - SCTR Filter: Requires SCTR >= 60 to focus on relatively strong stocks
 // - RSI(14): Must be >= 64 (strong momentum, not quite overbought)
 // - Moving Average Setup: SMA(24) <= SMA(128) (shorter MA below longer MA for trend confirmation)
 // - MACD Bullish Signal: MACD Line >= MACD Signal (positive momentum crossover)

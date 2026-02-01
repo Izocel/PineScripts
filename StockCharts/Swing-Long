@@ -14,6 +14,7 @@ and [Ichimoku Conversion Line(9,26,52) >= Ichimoku Base Line(9,26,52)]
 //
 // KEY COMPONENTS:
 // - Market Cap Filter: Only considers stocks with market cap > 2 billion (large-cap stability)
+// - SCTR Filter: Requires SCTR >= 80 to focus on top-performing stocks
 // - RSI(14): Must be >= 64 (strong momentum territory without being severely overbought)
 // - MACD Bullish Signal: MACD Line >= MACD Signal (confirming positive momentum trend)
 // - Ichimoku Trend Confirmation: Price must be above key Ichimoku levels

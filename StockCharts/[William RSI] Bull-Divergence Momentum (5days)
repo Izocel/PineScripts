@@ -16,6 +16,7 @@ and [4 days ago Williams %R(14) < Williams %R(14)]
 //
 // KEY COMPONENTS:
 // - Market Cap Filter: Only considers stocks with market cap > 2 billion
+// - SCTR Filter: Requires SCTR >= 40 to focus on moderately strong stocks
 // - Price Action: Stock must be down from 5 days ago (potential oversold condition)
 // - RSI(14): Must be <= 42 (oversold territory, indicating potential reversal)
 // - Williams %R(14): Must be <= -64 (oversold condition)
