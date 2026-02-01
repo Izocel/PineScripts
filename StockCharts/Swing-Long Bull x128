@@ -1,6 +1,6 @@
-// [MARKET CAP > 2,000] AND [RSI(14) >= 64.00] AND [MACD LINE(12,26,9) >= MACD SIGNAL(12,26,9)] AND [CLOSE >= ICHIMOKU BASE LINE(9,26,52)] AND [CLOSE >= ICHIMOKU CONVERSION LINE(9,26,52)] AND [ICHIMOKU CONVERSION LINE(9,26,52) >= ICHIMOKU BASE LINE(9,26,52)]
+// [MARKET CAP > 2,000] AND [RSI(14) >= 64.00] AND [SMA(24, CLOSE) <= SMA(128)] AND [MACD LINE(12,26,9) >= MACD SIGNAL(12,26,9)] AND [CLOSE >= ICHIMOKU CLOUD TOP(9,26,52)] AND [CLOSE >= ICHIMOKU BASE LINE(9,26,52)] AND [CLOSE >= ICHIMOKU CONVERSION LINE(9,26,52)] AND [ICHIMOKU CONVERSION LINE(9,26,52) >= ICHIMOKU BASE LINE(9,26,52)]
 
-// - Market Cap > $2B (liquidity filter)
+// - Market Cap > $50B (liquidity filter)
 // - RSI(14) >= 64 (strong momentum)
 // - MACD bullish crossover (MACD Line above Signal Line)
 // - Price above Ichimoku Base Line (Kijun-Sen) - medium-term support
@@ -9,15 +9,17 @@
 
 [market cap > 2,000]
 and [RSI(14) >= 64.00]
+and [SMA(24, close) <= SMA(128)]
 and [MACD Line(12,26,9) >= MACD Signal(12,26,9)]
+and [close >= Ichimoku Cloud Top(9,26,52)]
 and [close >= Ichimoku Base Line(9,26,52)]
 and [close >= Ichimoku Conversion Line(9,26,52)]
 and [Ichimoku Conversion Line(9,26,52) >= Ichimoku Base Line(9,26,52)]
 
-//and [Ichimoku Cloud Bottom(9,26,52) >= close]
-//and [Ichimoku Cloud Top(9,26,52) >= close]
-//[Ichimoku Span A(9,26,52) > 0]
-//[Ichimoku Span B(9,26,52) > 0]
+//[Ichimoku Span A(9,26,52)]
+//[Ichimoku Span B(9,26,52)]
+//Ichimoku Cloud Bottom(9,26,52)]
+//[Ichimoku Cloud Top(9,26,52)]
 
 // SWING LONG SCANNER - StockCharts.com
 // =====================================
