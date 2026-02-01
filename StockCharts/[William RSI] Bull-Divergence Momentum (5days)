@@ -1,7 +1,7 @@
 // For the last intraday update:
-// [MARKET CAP > 2,000] AND [5 DAYS AGO CLOSE > CLOSE] AND [RSI(14) <= 42] AND [WILLIAMS %R(14) <= -64] AND [MACD SIGNAL(12,26,9) <= 0.0] AND [MACD LINE(12,26,9) <= 0.0] AND [8 DAYS AGO RSI(14) < RSI(14)] AND [4 DAYS AGO WILLIAMS %R(14) < WILLIAMS %R(14)]
+// [MARKET CAP > 2,000] AND [SCTR >= 40] AND [5 DAYS AGO CLOSE > CLOSE] AND [RSI(14) <= 42] AND [WILLIAMS %R(14) <= -64] AND [MACD SIGNAL(12,26,9) <= 0.0] AND [MACD LINE(12,26,9) <= 0.0] AND [8 DAYS AGO RSI(14) < RSI(14)] AND [4 DAYS AGO WILLIAMS %R(14) < WILLIAMS %R(14)]
 
-[market cap > 2,000]
+[market cap > 2,000] and [SCTR >= 40]
 and [5 days ago close > close]
 and [RSI(14) <= 42]
 and [Williams %R(14) <= -64]
