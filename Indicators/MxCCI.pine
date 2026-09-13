@@ -1,0 +1,23 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © RVD-Projects
+
+//@version=6
+//@description Multi Commodity Channel Index indicator with Base and Conversion CCI
+indicator(title = "Multi Commodity Channel Index", shorttitle = "Mx CCI", overlay = false, timeframe = "", timeframe_gaps = false)
+
+showZero = input.bool(true, title = "Show Zero line")
+source = input.source(hlc3, title = "Source")
+baseLength = input.int(12, title = "Base MA length", minval = 1)
+conversionLength = input.int(26, title = "Conversion MA length", minval = 1)
+
+baseCci = ta.cci(source, baseLength)
+conversionCci = ta.cci(source, conversionLength)
+
+hline(showZero ? 0 : na, color = #ffeb3b, linestyle = hline.style_dashed)
+plot(baseCci, title = "Base CCI", color = color.red)
+plot(conversionCci, title = "Conv. CCI", color = color.blue)
+
+upperBand = hline(100, color = color.gray, linestyle = hline.style_dashed)
+lowerBand = hline(-100, color = color.gray, linestyle = hline.style_dashed)
+fill(upperBand, lowerBand, color = #a03bff38)
+
